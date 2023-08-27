@@ -1,42 +1,65 @@
-#Lista_simple.py
-from Node import Nodo
-from Graph import Graph
+class Node(object):
 
-class ListaSimple():
-    id = 0
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+    def __str__(self):
+        return str(self.value)
+
+    def get(self):
+        return self.value
+
+
+class ListaSimple(object):
+
     def __init__(self):
-        self.nodoInicio = None
-        self.nodoFinal = None
+        self.first = None
         self.size = 0
 
-    def getInicio(self):
-        return self.nodoInicio
-
-    def estaVacia(self):
-        return self.nodoInicio == None
-        #return self.size == 0
-
-    def agregarFinal(self, dato):
-        nuevo = Nodo(self.id, dato)
-        self.id += 1
-        if self.estaVacia():
-            self.nodoInicio = nuevo
-            self.nodoFinal = nuevo
+    def add(self, dato):
+        new_node = Node(dato)
+        if self.size == 0:
+            self.first = new_node
         else:
-            self.nodoFinal.setSiguiente(nuevo)
-            self.nodoFinal = nuevo
+            current = self.first
+            while current.next is not None:
+                current = current.next
+            current.next = new_node
         self.size += 1
+        return new_node
 
-    def imprimir(self):
-        tmp = self.nodoInicio
-        while tmp != None:
-            print(tmp.getDato())
-            tmp = tmp.getSiguiente()
+    def index(self, numero):
+        current = self.first
+        for _ in range(numero):
+            if current is None:
+                return None
+            current = current.next
+        return current
 
-    def graficar(self):
-        graph = Graph()
-        tmp = self.nodoInicio
-        while tmp != None:
-            graph.add(tmp, tmp.getSiguiente())
-            tmp = tmp.getSiguiente()
-        graph.generar()
+    def buscar(self, dato):
+        current = self.first
+        while current:
+            if current.value == dato:
+                return True
+            current = current.next
+        return False
+
+    def __len__(self):
+        return self.size
+
+    def recorrer(self):
+        current = self.first
+        for _ in range(len(self)):
+            print('current =', current)
+            current = current.next
+
+    def __str__(self):
+        elements = [str(current) for current in self]
+        return "[" + ", ".join(elements) + "]"
+
+    def __iter__(self):
+        current = self.first
+        while current:
+            yield current.value
+            current = current.next
