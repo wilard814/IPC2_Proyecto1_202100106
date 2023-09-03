@@ -156,59 +156,67 @@ Menú principal:
     if opcion == '3':
         print("\nArchivos de Salida")
         print("Escribiendo archivo...")
-        
         try:
-            root = ET.Element("senalesReducidas")
-            
-            for senal_index in range(len(matriz_reducida.matrices_reducidas)):
-                senal_actual_node = matriz_reducida.matrices_reducidas.index(senal_index)
-                if senal_actual_node is None:
-                    print(f"Error: senal_actual_node es None para el índice {senal_index}")
-                    continue
-                
-                senal_actual = senal_actual_node.value
-                grupos_actual_node = grupos_matriz.index(senal_index)
-                
-                if grupos_actual_node is None:
-                    print(f"Error: grupos_actual_node es None para el índice {senal_index}")
-                    continue
-                
-                grupos_actual = grupos_actual_node.value
-                senal_element = ET.SubElement(root, "senal", nombre=f"Senal_{senal_index+1}", A=str(len(senal_actual.index(0).value)))
+            xml_str = '<?xml version="1.0"?>\n'
+            xml_str += '<senalesReducidas>\n'
 
-                for grupo_index in range(len(grupos_actual)):
-                    grupo_actual_node = grupos_actual.index(grupo_index)
-                    if grupo_actual_node is None:
-                        print(f"Error: grupo_actual_node es None para el índice {grupo_index}")
-                        continue
-                    
-                    grupo_actual = grupo_actual_node.value
-                    grupo_element = ET.SubElement(senal_element, "grupo", g=str(grupo_index + 1))
-                    
-                    tiempos = ",".join([str(x) for x in grupo_actual])
-                    tiempos_element = ET.SubElement(grupo_element, "tiempos")
-                    tiempos_element.text = tiempos
-                    
-                    datosGrupo_element = ET.SubElement(grupo_element, "datosGrupo")
-                    
-                    for A_index in range(len(senal_actual.index(0).value)):
-                        A_value_node = senal_actual.index(grupo_index).value.index(A_index)
-                        if A_value_node is None:
-                            print(f"Error: A_value_node es None para el índice {A_index}")
-                            continue
-                        A_value = A_value_node.value
-                        dato_element = ET.SubElement(datosGrupo_element, "dato", A=str(A_index + 1))
-                        dato_element.text = str(A_value)
-            
-            # Guardar en el archivo XML
-            tree = ET.ElementTree(root)
-            tree.write("C:\\Users\\wilar\\OneDrive\\Escritorio\\pruebazzz\\Salidas\\output.xml")
-            
-            print("Archivo de salida escrito con éxito.")
+            matriz_reducida_index = 0
+            matriz_reducida_current = matriz_reducida.matrices_reducidas.first
+            while matriz_reducida_current:
+                matriz_reducida_actual = matriz_reducida_current.value
+
+                xml_str += '\t<senal nombre="Señal {}" A="{}">\n'.format(matriz_reducida_index + 1, len(matriz_reducida_actual.index(0).value))
+
+                fila_index = 0
+                fila_current = matriz_reducida_actual.first
+                while fila_current:
+                    fila = fila_current.value
+
+                    # Recuperamos los tiempos para este grupo específico
+                    grupo_str = str(fila)
+                    tiempos = matriz_reducida.encontrarTiemposPorGrupo(grupo_str)
+                    if tiempos is None:
+                        tiempos_str = ""
+                    else:
+                        tiempos_str = ",".join(str(tiempo) for tiempo in tiempos)
+
+                    xml_str += '\t\t<grupo g="{}">\n'.format(fila_index + 1)
+                    xml_str += '\t\t\t<tiempos>{}</tiempos>\n'.format(tiempos_str)
+                    xml_str += '\t\t\t<datosGrupo>\n'
+
+                    dato_index = 0
+                    dato_current = fila.first
+                    while dato_current:
+                        dato = dato_current.value
+                        xml_str += '\t\t\t\t<dato A="{}">{}</dato>\n'.format(dato_index + 1, dato)
+                        dato_index += 1
+                        dato_current = dato_current.next
+
+                    xml_str += '\t\t\t</datosGrupo>\n'
+                    xml_str += '\t\t</grupo>\n'
+
+                    fila_index += 1
+                    fila_current = fila_current.next
+                
+                xml_str += '\t</senal>\n'
+
+                matriz_reducida_index += 1
+                matriz_reducida_current = matriz_reducida_current.next
+
+            xml_str += '</senalesReducidas>\n'
+
+            with open("salida.xml", "w", encoding="utf-8") as f:
+                f.write(xml_str)
+
+            print("Archivo de salida escrito correctamente.")
             
         except Exception as e:
-            print(f"Ocurrió un error al generar el archivo de salida: {str(e)}")
+            print(f"Ocurrió un error al escribir el archivo de salida: {str(e)}")
+
         continue
+
+
+
 
     if opcion == '4':
         time.sleep(0.1)
@@ -238,7 +246,7 @@ Menú principal:
             señal_original = matriz.señales.index(seleccion).value
             señal_reducida = matriz_reducida.matrices_reducidas.index(seleccion).value
 
-            # Asumimos que 't' y 'A' son las dimensiones de la señal original, que puedes obtener de otra manera si es necesario.
+            
             t = len(señal_original)
             A = len(señal_original.index(0).value)
             g = len(señal_reducida)  # número de grupos en la señal reducida
@@ -294,8 +302,8 @@ Menú principal:
     if opcion == '6':
         print('Inicializando sistema...')
         time.sleep(0.3)
-        matriz = Matriz()  # Reiniciar la instancia de la clase Matriz
-        matriz_reducida = MatrizReducida()  # Reiniciar la instancia de la clase MatrizReducida
+        matriz = Matriz() 
+        matriz_reducida = MatrizReducida()  
         print('El sistema ha sido Inicializado')
         continue
 

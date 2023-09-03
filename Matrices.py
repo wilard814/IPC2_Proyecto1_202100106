@@ -68,10 +68,24 @@ class Matriz:
                 grupos.add(grupo)
         return grupos
 
+class GrupoTiempo:
+    def __init__(self, grupo_str, tiempos):
+        self.grupo_str = grupo_str
+        self.tiempos = tiempos
+
 class MatrizReducida:
 
     def __init__(self):
         self.matrices_reducidas = ListaSimple()
+        self.tiempos_por_grupo = ListaSimple()  # Una ListaSimple para almacenar los tiempos por cada grupo
+
+    def encontrarTiemposPorGrupo(self, grupo_str):
+        current = self.tiempos_por_grupo.first
+        while current:
+            if current.value.grupo_str == grupo_str:
+                return current.value.tiempos
+            current = current.next
+        return None
 
     def crearMatrizReducida(self, grupos, matriz_original):
         if grupos is None or matriz_original is None:
@@ -79,6 +93,7 @@ class MatrizReducida:
             return
 
         matriz_reducida = ListaSimple()
+
         grupos_unicos = ListaSimple()
         for i in range(len(grupos)):
             grupo = grupos.index(i)
@@ -88,7 +103,18 @@ class MatrizReducida:
                 print(f"Nodo None encontrado en el índice {i} en crearMatrizReducida para grupos")
                 continue
 
-            if not grupos_unicos.buscar(str(grupo)):
+            grupo_str = str(grupo)
+            tiempos = self.encontrarTiemposPorGrupo(grupo_str)
+
+            if tiempos is None:
+                tiempos = ListaSimple()
+                nuevo_grupo_tiempo = GrupoTiempo(grupo_str, tiempos)
+                self.tiempos_por_grupo.add(nuevo_grupo_tiempo)
+
+            # Almacenamos los tiempos en los que aparece este grupo
+            tiempos.add(i + 1)  # Asumiendo que los tiempos comienzan en 1
+
+            if not grupos_unicos.buscar(grupo_str):
                 fila_reducida = ListaSimple()
                 for j in range(len(matriz_original.index(0).value)):
                     suma_columna = 0
@@ -98,6 +124,6 @@ class MatrizReducida:
                         suma_columna += fila.index(j).value
                     fila_reducida.add(suma_columna)
                 matriz_reducida.add(fila_reducida)
-                grupos_unicos.add(str(grupo))
-        self.matrices_reducidas.add(matriz_reducida)
+                grupos_unicos.add(grupo_str)
 
+        self.matrices_reducidas.add(matriz_reducida)

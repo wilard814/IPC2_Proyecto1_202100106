@@ -1,0 +1,45 @@
+digraph "Señal Original" {
+	graph [rankdir=LR]
+	Senal [label="Señal"]
+	nombre [label="Nombre: Señal 1"]
+	t [label="t = 5" color=blue shape=doublecircle]
+	A [label="A = 4" color=blue shape=doublecircle]
+	Senal -> nombre
+	nombre -> t
+	nombre -> A
+	"x=0y=0" [label=2]
+	"x=1y=0" [label=3]
+	"x=0y=0" -> "x=1y=0"
+	"x=2y=0" [label=0]
+	"x=1y=0" -> "x=2y=0"
+	"x=3y=0" [label=4]
+	"x=2y=0" -> "x=3y=0"
+	"x=0y=1" [label=0]
+	"x=1y=1" [label=0]
+	"x=0y=1" -> "x=1y=1"
+	"x=2y=1" [label=6]
+	"x=1y=1" -> "x=2y=1"
+	"x=3y=1" [label=3]
+	"x=2y=1" -> "x=3y=1"
+	"x=0y=2" [label=3]
+	"x=1y=2" [label=4]
+	"x=0y=2" -> "x=1y=2"
+	"x=2y=2" [label=0]
+	"x=1y=2" -> "x=2y=2"
+	"x=3y=2" [label=2]
+	"x=2y=2" -> "x=3y=2"
+	"x=0y=3" [label=1]
+	"x=1y=3" [label=0]
+	"x=0y=3" -> "x=1y=3"
+	"x=2y=3" [label=1]
+	"x=1y=3" -> "x=2y=3"
+	"x=3y=3" [label=5]
+	"x=2y=3" -> "x=3y=3"
+	"x=0y=4" [label=0]
+	"x=1y=4" [label=0]
+	"x=0y=4" -> "x=1y=4"
+	"x=2y=4" [label=3]
+	"x=1y=4" -> "x=2y=4"
+	"x=3y=4" [label=1]
+	"x=2y=4" -> "x=3y=4"
+}

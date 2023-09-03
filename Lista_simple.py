@@ -63,3 +63,4 @@ class ListaSimple(object):
         while current:
             yield current.value
             current = current.next
+            
