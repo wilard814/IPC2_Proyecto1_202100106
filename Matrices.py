@@ -1,78 +1,103 @@
-from Lista_simple import ListaSimple
+from Lista_simple import ListaSimple  # Asegúrate de que esta importación sea correcta
 
 class Matriz:
 
     def __init__(self):
-        self.nombre = ListaSimple()
-        self.fila = ListaSimple()
-        self.columna = ListaSimple()
-        self.dato = ListaSimple()
+        self.señales = ListaSimple()
 
-    def guardar(self, nombre, t, A, dato):
-        self.nombre.add(nombre)
-        self.fila.add(t)
-        self.columna.add(A)
-        self.dato.add(dato)
+    def guardarSeñal(self, matriz):
+        if matriz is not None:
+            self.señales.add(matriz)
+            print(f"Se ha guardado una nueva señal. Número total de señales: {len(self.señales)}")
+        else:
+            print("Intento de añadir una matriz None.")
 
-    def crearMatrizPatrones(self):
-        matriz_patron = ListaSimple()
-        lista = ListaSimple()
-        listaJ = ListaSimple()
-        listaK = ListaSimple()
-        for i in range(len(self.dato)):
-            lista = self.dato.index(i).value
-            fila = ListaSimple()
-            for j in range(len(lista)):
-                listaJ = lista.index(j).value
-                columna = ListaSimple()
-                for k in range(len(listaJ)):
-                    listaK = listaJ.index(k).value
-                    if listaK.value > 0:
-                        columna.add(1)
-                    else:
-                        columna.add(0)
-                fila.add(columna)
-            matriz_patron.add(fila)
-        return matriz_patron
+    def crearMatrizPatrones(self, matriz):
+        if matriz is None:
+            print("Matriz None pasada a crearMatrizPatrones")
+            return None
+        
+        matriz_patrones = ListaSimple()
+        for i in range(len(matriz)):
+            fila = matriz.index(i)
+            if fila is not None:
+                fila = fila.value
+            else:
+                print(f"Nodo None encontrado en el índice {i} en crearMatrizPatrones")
+                continue
 
-    def grupos_Matriz(self, indice):
-        unico = ListaSimple()
-        fila_binaria = self.dato.index(indice).value  # Usamos el índice recibido como argumento para acceder al valor
+            fila_patron = ListaSimple()
+            for j in range(len(fila)):
+                amplitud = fila.index(j)
+                if amplitud is not None:
+                    amplitud = amplitud.value
+                else:
+                    print(f"Nodo None encontrado para la amplitud en el índice {j}")
+                    continue
 
-        if unico.buscar(str(fila_binaria)) == False:
-            unico.add(str(fila_binaria))
+                fila_patron.add(1 if amplitud > 0 else 0)
+            matriz_patrones.add(fila_patron)
+        return matriz_patrones
+
+    def agruparFilas(self, matriz_patrones):
+        if matriz_patrones is None:
+            print("Matriz None pasada a agruparFilas")
+            return None
 
         grupos = ListaSimple()
+        for i in range(len(matriz_patrones)):
+            fila_i = matriz_patrones.index(i)
+            if fila_i is not None:
+                fila_i = fila_i.value
+            else:
+                print(f"Nodo None encontrado en el índice {i} en agruparFilas")
+                continue
 
-        for i in range(len(unico)):
-            contador = 0
-            repetidos = ListaSimple()
+            grupo = ListaSimple()
+            for j in range(len(matriz_patrones)):
+                fila_j = matriz_patrones.index(j)
+                if fila_j is not None:
+                    fila_j = fila_j.value
+                else:
+                    print(f"Nodo None encontrado en el índice {j} en agruparFilas")
+                    continue
 
-            for j in range(len(self.dato)):
-                if str(unico.index(i)) == str(self.dato.index(j)):
-                    repetidos.add(contador)
-                contador += 1
-
-            grupos.add(repetidos)
-
+                if str(fila_i) == str(fila_j):
+                    grupo.add(j)
+            if not grupos.buscar(str(grupo)):
+                grupos.add(grupo)
         return grupos
 
-class Matriz_Reducida:
+class MatrizReducida:
 
     def __init__(self):
-        self.nombre = ListaSimple()
-        self.fila = ListaSimple()
-        self.columna = ListaSimple()
-        self.grupos = ListaSimple()
-        self.frecuencia = ListaSimple()
-        self.no_frecuencia = ListaSimple()
-        self.matriz = ListaSimple()
+        self.matrices_reducidas = ListaSimple()
 
-    def guardar(self, nombre, t, A, g, f, no_f, matriz):
-        self.nombre.add(nombre)
-        self.fila.add(t)
-        self.columna.add(A)
-        self.grupos.add(g)
-        self.frecuencia.add(f)
-        self.no_frecuencia.add(no_f)
-        self.matriz.add(matriz)
+    def crearMatrizReducida(self, grupos, matriz_original):
+        if grupos is None or matriz_original is None:
+            print("Grupos o matriz original None pasados a crearMatrizReducida")
+            return
+
+        matriz_reducida = ListaSimple()
+        grupos_unicos = ListaSimple()
+        for i in range(len(grupos)):
+            grupo = grupos.index(i)
+            if grupo is not None:
+                grupo = grupo.value
+            else:
+                print(f"Nodo None encontrado en el índice {i} en crearMatrizReducida para grupos")
+                continue
+
+            if not grupos_unicos.buscar(str(grupo)):
+                fila_reducida = ListaSimple()
+                for j in range(len(matriz_original.index(0).value)):
+                    suma_columna = 0
+                    for k in range(len(grupo)):
+                        fila_index = grupo.index(k).value
+                        fila = matriz_original.index(fila_index).value
+                        suma_columna += fila.index(j).value
+                    fila_reducida.add(suma_columna)
+                matriz_reducida.add(fila_reducida)
+                grupos_unicos.add(str(grupo))
+        self.matrices_reducidas.add(matriz_reducida)
+
