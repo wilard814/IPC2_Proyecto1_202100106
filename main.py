@@ -1,11 +1,8 @@
-#main.py
 import xml.etree.ElementTree as ET
 from graphviz import Digraph
 from Matrices import *
 from Lista_simple import *
 import time
-
-
 
 while True:
     print('''   
@@ -29,28 +26,32 @@ Menú principal:
         time.sleep(0.1)
         print('\nOpcion Cargar Archivo:')
         archivo = input('Ingrese la ruta del archivo: ')
+        
         try:
             archivo_xml = ET.parse(archivo)
             raiz = archivo_xml.getroot()
             matriz = Matriz()
+
             for senal in raiz:
+                # Verificar si el atributo 'nombre' está presente
                 if 'nombre' not in senal.attrib:
                     print("Error: Falta el atributo 'nombre' en la etiqueta 'senal'.")
                     continue
-
                 nombre = senal.attrib['nombre']
 
+                # Verificar si los atributos 't' y 'A' están presentes
                 if 't' not in senal.attrib or 'A' not in senal.attrib:
                     print(f"Error: Faltan los atributos 't' y/o 'A' en la señal '{nombre}'.")
                     continue
 
+                # Convertir los atributos a enteros
                 t = int(senal.attrib['t'])
                 A = int(senal.attrib['A'])
 
+                # Verificar los valores de 't' y 'A'
                 if t <= 0 or t > 3600:
                     print(f"Error: El valor de 't' en la señal '{nombre}' debe ser mayor a 0 y menor o igual a 3600.")
                     continue
-
                 if A <= 0 or A > 130:
                     print(f"Error: El valor de 'A' en la señal '{nombre}' debe ser mayor a 0 y menor o igual a 130.")
                     continue
@@ -60,6 +61,7 @@ Menú principal:
                 lista_dato = ListaSimple()
 
                 for index in senal:
+                    # Verificar los atributos 't' y 'A' en los datos
                     if 't' not in index.attrib or 'A' not in index.attrib:
                         print(f"Error: Faltan los atributos 't' y/o 'A' en la etiqueta 'dato' de la señal '{nombre}'.")
                         continue
@@ -67,6 +69,7 @@ Menú principal:
                     t_actual = int(index.attrib['t'])
                     A_actual = int(index.attrib['A'])
 
+                    # Actualizar los valores mayores de 't' y 'A'
                     if t_actual > mayor_t:
                         mayor_t = t_actual
                     if A_actual > mayor_A:
@@ -74,14 +77,15 @@ Menú principal:
 
                     lista_dato.add(int(index.text))
 
+                # Crear una matriz a partir de los datos
                 matriz_operar = ListaSimple()
-
                 for no_fila in range(0, t):
                     fila_matriz = ListaSimple()
                     for no_columna in range(0, A):
                         fila_matriz.add(lista_dato.index(no_fila * A + no_columna).value)
                     matriz_operar.add(fila_matriz)
 
+                # Guardar la señal si cumple con las condiciones
                 if t == mayor_t and A == mayor_A:
                     matriz.guardarSeñal(matriz_operar)
                     print(f"Guardada la matriz original para la señal {nombre}.")
@@ -90,9 +94,12 @@ Menú principal:
             print('Ocurrio un error:', str(e))
         continue
 
-
-
     if opcion == '2':
+    # Verificación si la matriz no está cargada
+        if matriz is None or len(matriz.señales) == 0:
+            print("Error: No se ha cargado ninguna matriz.")
+            continue
+
         time.sleep(0.1)
         print('\nProcesar archivo')
         print('> Calculando la matriz binaria...')
@@ -151,8 +158,6 @@ Menú principal:
         print("Matrices reducidas y grupos guardados correctamente.")
         continue
 
-
-
     if opcion == '3':
         print("\nArchivos de Salida")
         print("Escribiendo archivo...")
@@ -160,11 +165,13 @@ Menú principal:
             xml_str = '<?xml version="1.0"?>\n'
             xml_str += '<senalesReducidas>\n'
 
+            # Iterar sobre todas las matrices reducidas
             matriz_reducida_index = 0
             matriz_reducida_current = matriz_reducida.matrices_reducidas.first
             while matriz_reducida_current:
                 matriz_reducida_actual = matriz_reducida_current.value
 
+                # Añadir etiqueta de señal al XML
                 xml_str += '\t<senal nombre="Señal {}" A="{}">\n'.format(matriz_reducida_index + 1, len(matriz_reducida_actual.index(0).value))
 
                 fila_index = 0
@@ -172,18 +179,17 @@ Menú principal:
                 while fila_current:
                     fila = fila_current.value
 
-                    # Recuperamos los tiempos para este grupo específico
+                    # Obtener tiempos para el grupo actual
                     grupo_str = str(fila)
                     tiempos = matriz_reducida.encontrarTiemposPorGrupo(grupo_str)
-                    if tiempos is None:
-                        tiempos_str = ""
-                    else:
-                        tiempos_str = ",".join(str(tiempo) for tiempo in tiempos)
+                    tiempos_str = ",".join(str(tiempo) for tiempo in tiempos) if tiempos else ""
 
+                    # Añadir etiqueta de grupo al XML
                     xml_str += '\t\t<grupo g="{}">\n'.format(fila_index + 1)
                     xml_str += '\t\t\t<tiempos>{}</tiempos>\n'.format(tiempos_str)
                     xml_str += '\t\t\t<datosGrupo>\n'
 
+                    # Iterar sobre los datos de la fila y añadirlos al XML
                     dato_index = 0
                     dato_current = fila.first
                     while dato_current:
@@ -199,24 +205,21 @@ Menú principal:
                     fila_current = fila_current.next
                 
                 xml_str += '\t</senal>\n'
-
                 matriz_reducida_index += 1
                 matriz_reducida_current = matriz_reducida_current.next
 
             xml_str += '</senalesReducidas>\n'
 
+            # Escribir el XML a un archivo de salida
             with open("salida.xml", "w", encoding="utf-8") as f:
                 f.write(xml_str)
 
             print("Archivo de salida escrito correctamente.")
-            
+                
         except Exception as e:
             print(f"Ocurrió un error al escribir el archivo de salida: {str(e)}")
 
         continue
-
-
-
 
     if opcion == '4':
         time.sleep(0.1)
@@ -229,29 +232,30 @@ Menú principal:
         ''')
         continue
 
-
     if opcion == '5':
-        time.sleep(0.1)
         print('\nGenerar gráfica')
         print('\nSeñales guardadas:\n')
 
+        # Mostrar todas las señales guardadas
         for i in range(len(matriz.señales)):
             numeracion = str(i + 1) + "."
             print(numeracion, "Señal ", i + 1)
 
         seleccion = int(input('Ingrese el número de señal a graficar: '))
 
+        # Verificar si la selección es válida
         if 1 <= seleccion <= len(matriz.señales):
             seleccion -= 1
+
+            # Obtener la señal original y reducida seleccionada
             señal_original = matriz.señales.index(seleccion).value
             señal_reducida = matriz_reducida.matrices_reducidas.index(seleccion).value
 
-            
             t = len(señal_original)
             A = len(señal_original.index(0).value)
-            g = len(señal_reducida)  # número de grupos en la señal reducida
+            g = len(señal_reducida)
 
-            # Generar el gráfico de la señal original
+            # Generar gráfico para la señal original
             dot_original = Digraph("Señal Original", format="png")
             dot_original.graph_attr["rankdir"] = "LR"
             dot_original.node('Senal', 'Señal')
@@ -261,7 +265,6 @@ Menú principal:
             dot_original.edge('Senal', 'nombre')
             dot_original.edge('nombre', 't')
             dot_original.edge('nombre', 'A')
-
             for j in range(t):
                 fila = señal_original.index(j).value
                 for k in range(A):
@@ -269,10 +272,9 @@ Menú principal:
                     dot_original.node(f'x={k}y={j}', str(dato))
                     if k > 0:
                         dot_original.edge(f'x={k-1}y={j}', f'x={k}y={j}')
-
             dot_original.render(f"Reporte_Senal_{seleccion + 1}_Original", view=True)
 
-            # Generar el gráfico de la señal reducida
+            # Generar gráfico para la señal reducida
             dot_reducida = Digraph("Señal Reducida", format="png")
             dot_reducida.graph_attr["rankdir"] = "LR"
             dot_reducida.node('Senal', 'Señal')
@@ -282,7 +284,6 @@ Menú principal:
             dot_reducida.edge('Senal', 'nombre')
             dot_reducida.edge('nombre', 'g')
             dot_reducida.edge('nombre', 'A')
-
             for j in range(g):
                 fila = señal_reducida.index(j).value
                 for k in range(A):
@@ -290,7 +291,6 @@ Menú principal:
                     dot_reducida.node(f'gx={k}gy={j}', str(dato))
                     if k > 0:
                         dot_reducida.edge(f'gx={k-1}gy={j}', f'gx={k}gy={j}')
-
             dot_reducida.render(f"Reporte_Senal_{seleccion + 1}_Reducida", view=True)
 
             print(f'Las gráficas de la señal {seleccion + 1} y su señal reducida se han generado y guardado.')

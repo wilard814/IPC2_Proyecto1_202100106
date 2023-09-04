@@ -1,0 +1,31 @@
+digraph "Señal Reducida" {
+	graph [rankdir=LR]
+	Senal [label="Señal"]
+	nombre [label="Nombre: Señal 1"]
+	g [label="g = 3" color=blue shape=doublecircle]
+	A [label="A = 4" color=blue shape=doublecircle]
+	Senal -> nombre
+	nombre -> g
+	nombre -> A
+	"gx=0gy=0" [label=5]
+	"gx=1gy=0" [label=7]
+	"gx=0gy=0" -> "gx=1gy=0"
+	"gx=2gy=0" [label=0]
+	"gx=1gy=0" -> "gx=2gy=0"
+	"gx=3gy=0" [label=6]
+	"gx=2gy=0" -> "gx=3gy=0"
+	"gx=0gy=1" [label=0]
+	"gx=1gy=1" [label=0]
+	"gx=0gy=1" -> "gx=1gy=1"
+	"gx=2gy=1" [label=9]
+	"gx=1gy=1" -> "gx=2gy=1"
+	"gx=3gy=1" [label=4]
+	"gx=2gy=1" -> "gx=3gy=1"
+	"gx=0gy=2" [label=1]
+	"gx=1gy=2" [label=0]
+	"gx=0gy=2" -> "gx=1gy=2"
+	"gx=2gy=2" [label=1]
+	"gx=1gy=2" -> "gx=2gy=2"
+	"gx=3gy=2" [label=5]
+	"gx=2gy=2" -> "gx=3gy=2"
+}
