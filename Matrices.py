@@ -1,10 +1,12 @@
-from Lista_simple import ListaSimple  # Asegúrate de que esta importación sea correcta
+from Lista_simple import ListaSimple 
 
+# Clase para representar y gestionar matrices de señales
 class Matriz:
-
+    # Constructor: inicializa una lista de señales vacía
     def __init__(self):
         self.señales = ListaSimple()
 
+    # Método para guardar una matriz como señal
     def guardarSeñal(self, matriz):
         if matriz is not None:
             self.señales.add(matriz)
@@ -12,6 +14,7 @@ class Matriz:
         else:
             print("Intento de añadir una matriz None.")
 
+    # Método para convertir una matriz en una matriz de patrones (binaria)
     def crearMatrizPatrones(self, matriz):
         if matriz is None:
             print("Matriz None pasada a crearMatrizPatrones")
@@ -39,6 +42,7 @@ class Matriz:
             matriz_patrones.add(fila_patron)
         return matriz_patrones
 
+    # Método para agrupar filas similares en la matriz de patrones
     def agruparFilas(self, matriz_patrones):
         if matriz_patrones is None:
             print("Matriz None pasada a agruparFilas")
@@ -68,17 +72,19 @@ class Matriz:
                 grupos.add(grupo)
         return grupos
 
+# Clase para asociar un grupo de tiempos a una cadena de grupo
 class GrupoTiempo:
     def __init__(self, grupo_str, tiempos):
         self.grupo_str = grupo_str
         self.tiempos = tiempos
 
+# Clase para representar y gestionar matrices reducidas
 class MatrizReducida:
-
     def __init__(self):
         self.matrices_reducidas = ListaSimple()
-        self.tiempos_por_grupo = ListaSimple()  # Una ListaSimple para almacenar los tiempos por cada grupo
+        self.tiempos_por_grupo = ListaSimple()  
 
+    # Método para encontrar tiempos asociados a un grupo específico
     def encontrarTiemposPorGrupo(self, grupo_str):
         current = self.tiempos_por_grupo.first
         while current:
@@ -87,13 +93,13 @@ class MatrizReducida:
             current = current.next
         return None
 
+    # Método para crear una matriz reducida a partir de grupos y matriz original
     def crearMatrizReducida(self, grupos, matriz_original):
         if grupos is None or matriz_original is None:
             print("Grupos o matriz original None pasados a crearMatrizReducida")
             return
 
         matriz_reducida = ListaSimple()
-
         grupos_unicos = ListaSimple()
         for i in range(len(grupos)):
             grupo = grupos.index(i)
@@ -111,8 +117,7 @@ class MatrizReducida:
                 nuevo_grupo_tiempo = GrupoTiempo(grupo_str, tiempos)
                 self.tiempos_por_grupo.add(nuevo_grupo_tiempo)
 
-            # Almacenamos los tiempos en los que aparece este grupo
-            tiempos.add(i + 1)  # Asumiendo que los tiempos comienzan en 1
+            tiempos.add(i + 1)  
 
             if not grupos_unicos.buscar(grupo_str):
                 fila_reducida = ListaSimple()
