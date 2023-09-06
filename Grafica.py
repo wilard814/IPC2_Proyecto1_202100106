@@ -13,6 +13,9 @@ def mostrar_datos_estudiante():
 
 
 def generar_grafica(matriz, matriz_reducida):
+        if matriz is None or matriz_reducida is None:
+            print('No se ha cargado un archivo o no se ha procesado el archivo')
+            return
         print('\nGenerar gráfica')
         print('\nSeñales guardadas:\n')
 

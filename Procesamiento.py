@@ -4,81 +4,75 @@ from Lista_simple import *
 import time
 
 def cargar_archivo():
-        print('\nOpcion Cargar Archivo:')
-        archivo = input('Ingrese la ruta del archivo: ')
-        
-        try:
-            archivo_xml = ET.parse(archivo)
-            raiz = archivo_xml.getroot()
-            matriz = Matriz()
+    print('\nOpcion Cargar Archivo:')
+    archivo = input('Ingrese la ruta del archivo: ')
 
-            for senal in raiz:
-                # Verificar si el atributo 'nombre' está presente
-                if 'nombre' not in senal.attrib:
-                    print("Error: Falta el atributo 'nombre' en la etiqueta 'senal'.")
-                    continue
-                nombre = senal.attrib['nombre']
+    matriz = Matriz()  # Inicialización de la estructura para guardar las señales
 
-                # Verificar si los atributos 't' y 'A' están presentes
-                if 't' not in senal.attrib or 'A' not in senal.attrib:
-                    print(f"Error: Faltan los atributos 't' y/o 'A' en la señal '{nombre}'.")
-                    continue
+    try:
+        archivo_xml = ET.parse(archivo)
+        raiz = archivo_xml.getroot()
 
-                # Convertir los atributos a enteros
-                t = int(senal.attrib['t'])
-                A = int(senal.attrib['A'])
+        for senal in raiz:
+            # Verificar si el atributo 'nombre' está presente
+            if 'nombre' not in senal.attrib:
+                print("Error: Falta el atributo 'nombre' en la etiqueta 'senal'.")
+                continue
+            nombre = senal.attrib['nombre']
 
-                # Verificar los valores de 't' y 'A'
-                if t <= 0 or t > 3600:
-                    print(f"Error: El valor de 't' en la señal '{nombre}' debe ser mayor a 0 y menor o igual a 3600.")
-                    continue
-                if A <= 0 or A > 130:
-                    print(f"Error: El valor de 'A' en la señal '{nombre}' debe ser mayor a 0 y menor o igual a 130.")
-                    continue
+            # Verificar si los atributos 't' y 'A' están presentes
+            if 't' not in senal.attrib or 'A' not in senal.attrib:
+                print(f"Error: Faltan los atributos 't' y/o 'A' en la señal '{nombre}'.")
+                continue
 
-                mayor_t = 0
-                mayor_A = 0
-                lista_dato = ListaSimple()
+            # Convertir los atributos a enteros
+            t = int(senal.attrib['t'])
+            A = int(senal.attrib['A'])
 
-                for index in senal:
-                    # Verificar los atributos 't' y 'A' en los datos
-                    if 't' not in index.attrib or 'A' not in index.attrib:
-                        print(f"Error: Faltan los atributos 't' y/o 'A' en la etiqueta 'dato' de la señal '{nombre}'.")
-                        continue
+            # Verificar los valores de 't' y 'A'
+            if t <= 0 or t > 3600:
+                print(f"Error: El valor de 't' en la señal '{nombre}' no es válido.")
+                continue
+            if A <= 0 or A > 130:
+                print(f"Error: El valor de 'A' en la señal '{nombre}' no es válido.")
+                continue
 
-                    t_actual = int(index.attrib['t'])
-                    A_actual = int(index.attrib['A'])
+            datos_validos = True
+            matriz_operar = ListaSimple()
+            for dato in senal:
+                t_dato = int(dato.attrib.get('t', -1))
+                A_dato = int(dato.attrib.get('A', -1))
 
-                    # Actualizar los valores mayores de 't' y 'A'
-                    if t_actual > mayor_t:
-                        mayor_t = t_actual
-                    if A_actual > mayor_A:
-                        mayor_A = A_actual
+                # Verificar que los datos estén dentro de los límites de 't' y 'A'
+                if t_dato > t or A_dato > A or t_dato <= 0 or A_dato <= 0:
+                    datos_validos = False
+                    print(f"Error: Datos en la señal '{nombre}' exceden las dimensiones declaradas o son inválidos.")
+                    break
 
-                    lista_dato.add(int(index.text))
+                # Guardar el dato en la matriz temporal
+                fila_matriz = matriz_operar.index(t_dato - 1)
+                if fila_matriz:
+                    fila_matriz.value.index(A_dato - 1).value = int(dato.text)
+                else:
+                    fila = ListaSimple()
+                    for _ in range(A):
+                        fila.add(0)
+                    fila.index(A_dato - 1).value = int(dato.text)
+                    matriz_operar.add(fila)
 
-                # Crear una matriz a partir de los datos
-                matriz_operar = ListaSimple()
-                for no_fila in range(0, t):
-                    fila_matriz = ListaSimple()
-                    for no_columna in range(0, A):
-                        fila_matriz.add(lista_dato.index(no_fila * A + no_columna).value)
-                    matriz_operar.add(fila_matriz)
+            # Guardar la señal si los datos son válidos
+            if datos_validos:
+                matriz.guardarSeñal(matriz_operar)
 
-                # Guardar la señal si cumple con las condiciones
-                if t == mayor_t and A == mayor_A:
-                    matriz.guardarSeñal(matriz_operar)
-                    print(f"Guardada la matriz original para la señal {nombre}.")
-
-        except Exception as e:
-            print('Ocurrio un error:', str(e))
-        return matriz
+    except Exception as e:
+        print('Ocurrio un error:', str(e))
+    return matriz
 
 def procesar_archivo(matriz):
     # Verificación si la matriz no está cargada
         if matriz is None or len(matriz.señales) == 0:
             print("Error: No se ha cargado ninguna matriz.")
-
+            return 
         time.sleep(0.1)
         print('\nProcesar archivo')
         print('> Calculando la matriz binaria...')
@@ -139,6 +133,9 @@ def procesar_archivo(matriz):
 
 
 def escribir_archivo_salida(matriz_reducida):
+        if matriz_reducida is None or len(matriz_reducida.matrices_reducidas) == 0:
+            print("Error: No se ha cargado ninguna matriz.")
+            return 
         print("\nArchivos de Salida")
         print("Escribiendo archivo...")
         try:
